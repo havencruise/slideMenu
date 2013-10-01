@@ -1,0 +1,15 @@
+"#containerview": {
+    layout: 'composite'  
+},
+"#rightMenu": {
+    top: "0dp", right: "0dp",
+    width: "250dp", height: Ti.UI.FILL,
+    zIndex: 2,
+    backgroundColor : "#ccc"
+}
+"#movableView": {
+    zIndex: 3,
+    width : Ti.Platform.displayCaps.platformWidth, height: Ti.UI.FILL,
+    backgroundColor: '#eee',
+    boderWidth: 1, borderColor: '#f00'
+}

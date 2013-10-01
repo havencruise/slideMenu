@@ -1,0 +1,10 @@
+<Alloy>
+    <View id="containerview">
+        <View id="rightMenu">
+            <View id="menuView" />
+        </View>
+        <View id="movableView" >
+            <View id="contentView" />
+        </View>
+    </View>
+</Alloy>
