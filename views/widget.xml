@@ -1,6 +1,7 @@
 <Alloy>
     <View id="containerview">
         <View id="rightMenu">
+            <View id="shadow" />
             <View id="menuView" />
         </View>
         <View id="movableView" >
