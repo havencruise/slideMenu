@@ -1,4 +1,5 @@
-var closeAnimation = Ti.UI.createAnimation({
+var slideAllowed = true,    // in case the app doesn't need a pullout menu
+closeAnimation = Ti.UI.createAnimation({
     left : 0,
     curve : Ti.UI.ANIMATION_CURVE_EASE_OUT,
     duration : 150
@@ -11,7 +12,7 @@ openAnimation = Ti.UI.createAnimation({
 slide = {
     // maintains the state of slide
     touchWidth: 30,         // how wide is the edge slide start region
-    stickyWidth: 70,       // how far to let the user slide before sticy effect
+    stickyWidth: 70,        // how far to let the user slide before sticy effect
     enabled: false,         // can the view slide
     maxSlide: 250,
     initialLeft: 0,
@@ -27,16 +28,17 @@ slide = {
 
 $.movableView.addEventListener('touchstart', function(e){
     var ordinates = $.movableView.getRect();
-    slide.initialLeft = ordinates.x;
-    slide.start.set(e.x, e.y);
-    if(e.x >= (ordinates.width - slide.touchWidth)){
+
+    if((e.x >= (ordinates.width - slide.touchWidth)) && slideAllowed){ 
         // if can slide
+        slide.initialLeft = ordinates.x;
+        slide.start.set(e.x, e.y);
         slide.setEnabled(true);
     }
 });
 
 $.movableView.addEventListener('touchmove', function(e){
-    if(slide.enabled){
+    if(slide.enabled && slideAllowed){
         var ordinates = $.movableView.getRect(),
             diff = e.x - slide.start.x,
             newX = ordinates.x + diff,
@@ -58,9 +60,9 @@ $.movableView.addEventListener('touchmove', function(e){
 });
 
 $.movableView.addEventListener('touchend', function(e){
-    var direction = (e.x - slide.start.x) < 0 ? 'left' : 'right',
+    if(slide.enabled && slideAllowed){
+        var direction = (e.x - slide.start.x) < 0 ? 'left' : 'right',
         ordinates = $.movableView.getRect();
-    if(slide.enabled){
         if(!(Math.abs(e.x - slide.start.x) > slide.stickyWidth)){
             // return back to edge
             if(direction === 'left'){
@@ -79,3 +81,28 @@ $.movableView.addEventListener('touchend', function(e){
         }
     }
 });
+
+exports.disablePullOut = function(){
+    slideAllowed = false;
+}
+
+exports.enablePullOut = function(){
+    slideAllowed = true;
+}
+
+exports.open = function(){
+    var ordinates;
+    $.movableView.animate(openAnimation, function(){
+        ordinates = $.movableView.getRect();
+        slide.initialLeft = ordinates.x;
+    });
+}
+
+exports.close = function(){
+    var ordinates;
+    $.movableView.animate(closeAnimation, function(){
+        ordinates = $.movableView.getRect();
+        slide.initialLeft = ordinates.x;
+    });
+}
+
