@@ -1,5 +1,5 @@
 <Alloy>
-    <View id="containerview">
+    <View id="containerView">
         <View id="rightMenu">
             <View id="shadow" />
             <View id="menuView" />
@@ -8,4 +8,4 @@
             <View id="contentView" />
         </View>
     </View>
-</Alloy>
+</Alloy></Alloy>

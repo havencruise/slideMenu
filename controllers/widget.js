@@ -29,25 +29,30 @@ slide = {
 };
 
 $.movableView.addEventListener('touchstart', function(e){
-    var ordinates = $.movableView.getRect();
+    var ordinates = $.movableView.getRect(),
+        localPoint = {x:e.x, y:e.y},
+        coords = e.source.convertPointToView(localPoint, $.movableView);
 
-    if((e.x >= (ordinates.width - slide.touchWidth)) && slideAllowed){ 
+    if((coords.x >= (ordinates.width - slide.touchWidth)) && slideAllowed){ 
         // if can slide
         slide.initialLeft = ordinates.x;
-        slide.start.set(e.x, e.y);
+        slide.start.set(coords.x, coords.y);
         slide.setEnabled(true);
     }
-});
+}); 
 
 $.movableView.addEventListener('touchmove', function(e){
-    if(slide.enabled && slideAllowed){
-        var ordinates = $.movableView.getRect(),
-            diff = e.x - slide.start.x,
-            newX = ordinates.x + diff,
-            direction = (e.x - slide.start.x) < 0 ? 'left' : 'right';
-
+    var ordinates = $.movableView.getRect(),
+        localPoint = {x:e.x, y:e.y},
+        coords = e.source.convertPointToView(localPoint, $.movableView),
+        diff = coords.x - slide.start.x,
+        newX = ordinates.x + diff,
+        direction = (coords.x - slide.start.x) < 0 ? 'left' : 'right';
+    
+    if(slide.enabled && slideAllowed && (Math.abs(diff) > 0)){
         if(((direction === 'left') && !(Math.abs(newX) > slide.maxSlide)) ||
           ((direction === 'right') && !(newX > 0)) ) { // allowed to slide
+            
             $.movableView.setLeft(newX);
             
             if(Math.abs( Math.abs(slide.initialLeft) - Math.abs(ordinates.x)) > slide.stickyWidth){
@@ -63,9 +68,13 @@ $.movableView.addEventListener('touchmove', function(e){
 
 $.movableView.addEventListener('touchend', function(e){
     if(slide.enabled && slideAllowed){
-        var direction = (e.x - slide.start.x) < 0 ? 'left' : 'right',
-        ordinates = $.movableView.getRect();
-        if(!(Math.abs(e.x - slide.start.x) > slide.stickyWidth)){
+        
+        var localPoint = {x:e.x, y:e.y},
+            coords = e.source.convertPointToView(localPoint, $.movableView),
+            direction = (coords.x - slide.start.x) < 0 ? 'left' : 'right',
+            ordinates = $.movableView.getRect();
+        
+        if(!(Math.abs(coords.x - slide.start.x) > slide.stickyWidth)){
             // return back to edge
             if(direction === 'left'){
                 $.close();
@@ -78,11 +87,11 @@ $.movableView.addEventListener('touchend', function(e){
 
 exports.disablePullOut = function(){
     slideAllowed = false;
-}
+};
 
 exports.enablePullOut = function(){
     slideAllowed = true;
-}
+};
 
 exports.open = function(){
     var ordinates;
@@ -92,7 +101,7 @@ exports.open = function(){
         slide.initialLeft = ordinates.x;
         slide.isOpen = true;
     });
-}
+};
 
 exports.close = function(){
     var ordinates;
@@ -102,5 +111,5 @@ exports.close = function(){
         slide.initialLeft = ordinates.x;
         slide.isOpen = false;
     });
-}
+};
 
