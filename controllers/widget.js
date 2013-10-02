@@ -15,6 +15,7 @@ slide = {
     stickyWidth: 70,        // how far to let the user slide before sticy effect
     enabled: false,         // can the view slide
     maxSlide: 250,
+    isOpen: false,
     initialLeft: 0,
     start: {                // start position of the slide
         x: 0, y: 0,
@@ -24,6 +25,7 @@ slide = {
         if(val) this.enabled = true;
         else this.enabled = false;
     },
+
 };
 
 $.movableView.addEventListener('touchstart', function(e){
@@ -47,13 +49,13 @@ $.movableView.addEventListener('touchmove', function(e){
         if(((direction === 'left') && !(Math.abs(newX) > slide.maxSlide)) ||
           ((direction === 'right') && !(newX > 0)) ) { // allowed to slide
             $.movableView.setLeft(newX);
-            if((Math.abs(slide.initialLeft)-Math.abs(ordinates.x)) > slide.stickyWidth){
+            
+            if(Math.abs( Math.abs(slide.initialLeft) - Math.abs(ordinates.x)) > slide.stickyWidth){
                 if(direction === 'left'){
-                    $.movableView.animate(openAnimation);
+                    $.open();
                 } else if(direction === 'right') {
-                    $.movableView.animate(closeAnimation);
+                    $.close();
                 }
-                slide.setEnabled(false);
             }
         }
     }
@@ -66,17 +68,9 @@ $.movableView.addEventListener('touchend', function(e){
         if(!(Math.abs(e.x - slide.start.x) > slide.stickyWidth)){
             // return back to edge
             if(direction === 'left'){
-                $.movableView.animate(closeAnimation, function(){
-                    slide.setEnabled(false);
-                    ordinates = $.movableView.getRect();
-                    slide.initialLeft = ordinates.x;
-                });
+                $.close();
             } else {
-                $.movableView.animate(openAnimation, function(){
-                    slide.setEnabled(false);
-                    ordinates = $.movableView.getRect();
-                    slide.initialLeft = ordinates.x;
-                });
+                $.open();
             }
         }
     }
@@ -92,17 +86,21 @@ exports.enablePullOut = function(){
 
 exports.open = function(){
     var ordinates;
+    slide.setEnabled(false);
     $.movableView.animate(openAnimation, function(){
         ordinates = $.movableView.getRect();
         slide.initialLeft = ordinates.x;
+        slide.isOpen = true;
     });
 }
 
 exports.close = function(){
     var ordinates;
+    slide.setEnabled(false);
     $.movableView.animate(closeAnimation, function(){
         ordinates = $.movableView.getRect();
         slide.initialLeft = ordinates.x;
+        slide.isOpen = false;
     });
 }
 
