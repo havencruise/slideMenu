@@ -11,7 +11,7 @@ openAnimation = Ti.UI.createAnimation({
 slide = {
     // maintains the state of slide
     touchWidth: 30,         // how wide is the edge slide start region
-    stickyWidth: 100,       // how far to let the user slide before sticy effect
+    stickyWidth: 70,       // how far to let the user slide before sticy effect
     enabled: false,         // can the view slide
     maxSlide: 250,
     initialLeft: 0,
@@ -36,42 +36,44 @@ $.movableView.addEventListener('touchstart', function(e){
 });
 
 $.movableView.addEventListener('touchmove', function(e){
-    if(slide.enabled){ 
+    if(slide.enabled){
         var ordinates = $.movableView.getRect(),
-            newX = ordinates.x + (e.x - slide.start.x),
+            diff = e.x - slide.start.x,
+            newX = ordinates.x + diff,
             direction = (e.x - slide.start.x) < 0 ? 'left' : 'right';
-        if( ((direction === 'left') && !(Math.abs(newX) > slide.maxSlide)) ||
-            ((direction === 'right') && !(newX > 0)) ) {
-            // allowed to slide
+
+        if(((direction === 'left') && !(Math.abs(newX) > slide.maxSlide)) ||
+          ((direction === 'right') && !(newX > 0)) ) { // allowed to slide
             $.movableView.setLeft(newX);
+            if((Math.abs(slide.initialLeft)-Math.abs(ordinates.x)) > slide.stickyWidth){
+                if(direction === 'left'){
+                    $.movableView.animate(openAnimation);
+                } else if(direction === 'right') {
+                    $.movableView.animate(closeAnimation);
+                }
+                slide.setEnabled(false);
+            }
         }
     }
 });
 
 $.movableView.addEventListener('touchend', function(e){
-    var direction = (e.x - slide.start.x) < 0 ? 'left' : 'right';
-    
+    var direction = (e.x - slide.start.x) < 0 ? 'left' : 'right',
+        ordinates = $.movableView.getRect();
     if(slide.enabled){
-        if(Math.abs(e.x - slide.start.x) > slide.stickyWidth){
-            // sticky-ness logic
-            if(direction === 'left'){
-                $.movableView.animate(openAnimation, function(){
-                    slide.setEnabled(false);
-                });
-            } else if(direction === 'right') {
-                $.movableView.animate(closeAnimation, function(){
-                    slide.setEnabled(false);
-                });
-            }
-        } else {
+        if(!(Math.abs(e.x - slide.start.x) > slide.stickyWidth)){
             // return back to edge
             if(direction === 'left'){
                 $.movableView.animate(closeAnimation, function(){
                     slide.setEnabled(false);
+                    ordinates = $.movableView.getRect();
+                    slide.initialLeft = ordinates.x;
                 });
             } else {
                 $.movableView.animate(openAnimation, function(){
                     slide.setEnabled(false);
+                    ordinates = $.movableView.getRect();
+                    slide.initialLeft = ordinates.x;
                 });
             }
         }
